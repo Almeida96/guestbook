@@ -6,7 +6,8 @@ RUN go mod init guestbook
 RUN go mod tidy
 RUN CGO_ENABLED=0 go build -o guestbook main.go
 
-FROM alpine:3.22
+# The Go binary is statically linked (CGO_ENABLED=0), so no runtime base image is needed.
+FROM scratch
 WORKDIR /app
 COPY --from=builder /app/guestbook /app/guestbook
 COPY public/index.html /app/public/index.html
