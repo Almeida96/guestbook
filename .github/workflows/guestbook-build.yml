@@ -1,0 +1,36 @@
+name: Validate Guestbook images
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+jobs:
+  docker-smoke-test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify project artifacts
+        run: |
+          grep -Fq '<title>Guestbook - v1</title>' v1/guestbook/public/index.html
+          grep -Fq '<h1>Guestbook - v1</h1>' v1/guestbook/public/index.html
+          grep -Fq '<title>Guestbook - v2</title>' v2/guestbook/public/index.html
+          grep -Fq '<h1>Guestbook - v2</h1>' v2/guestbook/public/index.html
+          grep -Fq 'EXPOSE 3000' v1/guestbook/Dockerfile
+          bash -n scripts/lab.sh
+      - name: Build v1 image (CI only)
+        run: docker build -t guestbook:v1 v1/guestbook
+      - name: Build v2 image (CI only)
+        run: docker build -t guestbook:v2 v2/guestbook
+      - name: Smoke test v1 HTTP response
+        run: |
+          docker run --name guestbook-v1-ci -d -p 3000:3000 guestbook:v1
+          for attempt in $(seq 1 20); do
+            if curl -fsS http://127.0.0.1:3000/ | grep -Fq 'Guestbook - v1'; then
+              docker rm -f guestbook-v1-ci
+              exit 0
+            fi
+            sleep 2
+          done
+          docker logs guestbook-v1-ci
+          exit 1
