@@ -1,0 +1,38 @@
+# Template: scripts/lab.sh renders __NAMESPACE__ using your actual IBM Cloud namespace.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: guestbook
+  labels:
+    app: guestbook
+  annotations:
+    kubernetes.io/change-cause: "Guestbook v2 image and CPU allocation"
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: guestbook
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  template:
+    metadata:
+      labels:
+        app: guestbook
+        version: v2
+    spec:
+      containers:
+        - name: guestbook
+          image: us.icr.io/__NAMESPACE__/guestbook:v2
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 3000
+          resources:
+            requests:
+              cpu: 2m
+            limits:
+              cpu: 5m
