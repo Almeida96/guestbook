@@ -130,3 +130,4 @@ dmypy.json
 
 # Real IBM lab evidence and generated manifests
 /evidence/
+node_modules/

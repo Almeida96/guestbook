@@ -9,7 +9,7 @@ $(document).ready(function() {
   var appendGuestbookEntries = function(data) {
     entriesElement.empty();
     $.each(data, function(key, val) {
-      entriesElement.append("<p>" + val + "</p>");
+      entriesElement.append($("<p>").text(val));
     });
   }
 
@@ -26,7 +26,7 @@ $(document).ready(function() {
 
   submitElement.click(handleSubmission);
   formElement.submit(handleSubmission);
-  hostAddressElement.append(document.URL);
+  hostAddressElement.text(document.URL);
 
   // Poll every second.
   (function fetchGuestbook() {
